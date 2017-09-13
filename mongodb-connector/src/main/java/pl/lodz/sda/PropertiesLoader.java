@@ -1,5 +1,7 @@
 package pl.lodz.sda;
 
+import org.apache.log4j.Logger;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +11,7 @@ import static java.lang.Integer.valueOf;
 
 public class PropertiesLoader {
 
+    final static Logger logger = Logger.getLogger(PropertiesLoader.class);
     public static String PATH = "connection.properties";
     Properties prop = new Properties();
 
@@ -19,9 +22,10 @@ public class PropertiesLoader {
             try {
                 prop.load(inputStream);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e);
             } finally {
                 inputStream.close();
+                logger.debug("inputStream is closed");
             }
         } else {
             throw new FileNotFoundException("property file '" + PATH + "' not found in the classpath");
@@ -42,6 +46,10 @@ public class PropertiesLoader {
 
     public int getPort() {
         return valueOf(getProperty("our.super.mongodb.port"));
+    }
+
+    public String getSchema() {
+        return getProperty("our.super.mongodb.schema");
     }
 
     private String getProperty(String key) {
