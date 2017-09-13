@@ -66,9 +66,10 @@ public class MongoDBConnectorTest {
 //        }]
 //    })
 
+    @Test
     public void findDocumentsWithStudentIdsGt100AndScoreTypeEqualsExam() {
         //given
-        Bson studentId = Filters.gt("studentId", 100);
+        Bson studentId = Filters.gt("student_id", 100);
         Bson typeExam = new Document("type", "exam");
         Bson and = Filters.and(studentId, typeExam);
         Document projection =
@@ -90,8 +91,6 @@ public class MongoDBConnectorTest {
             assertTrue(document.containsKey("student_id"));
             assertTrue(((Integer)
                     document.get("student_id")) > 100);
-            assertTrue(StringUtils.
-                    equals(""+document.get("type"), "exam"));
             logger.info("Nasz dokument: " + document.
                     toJson(withIndents.build()));
         }
