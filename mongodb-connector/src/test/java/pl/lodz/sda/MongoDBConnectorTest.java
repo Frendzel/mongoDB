@@ -1,14 +1,18 @@
 package pl.lodz.sda;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonWriterSettings;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 import static org.bson.json.JsonWriterSettings.builder;
 import static org.junit.Assert.assertTrue;
@@ -95,6 +99,37 @@ public class MongoDBConnectorTest {
                     toJson(withIndents.build()));
         }
         iterator.close();
+    }
+
+///
+// db.grades.aggregateDocuments([{ $match: {}},
+// { $group: { _id: “$student_id”, srednia: {$avg: “$score”} } }])
+//
+
+    @Test
+    public void calculateStudentsIdAvg() {
+        //given
+        ArrayList<Bson> pipeline = new ArrayList<Bson>();
+        Bson match = Aggregates.match(new Document());
+        Bson group = Aggregates.group("$student_id",
+                Accumulators.avg("srednia",
+                        "$score"));
+        pipeline.add(match);
+        pipeline.add(group);
+        //when
+        AggregateIterable<Document> results =
+                mongoDBConnector.aggregateDocuments(GRADES, pipeline);
+        //then
+        JsonWriterSettings.Builder withIndents =
+                builder().indent(true);
+        MongoCursor<Document> iterator = results.iterator();
+        while(iterator.hasNext()){
+            Document avgScore = iterator.next();
+            logger.info(avgScore.toJson(withIndents.build()));
+        }
+        iterator.close();
+
+
     }
 
 //        MongoCollection<Document> documentCollection = database.getCollection("grades");

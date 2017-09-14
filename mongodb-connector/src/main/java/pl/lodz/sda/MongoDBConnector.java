@@ -3,6 +3,7 @@ package pl.lodz.sda;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static org.apache.log4j.Logger.getLogger;
 
-public class MongoDBConnector {
+public class MongoDBConnector implements MongoDBConnectorApi{
 
     final static Logger logger = getLogger(MongoDBConnector.class);
 
@@ -50,10 +51,22 @@ public class MongoDBConnector {
     public FindIterable<Document> findDocuments(String collectionName,
                                                 Bson filter,
                                                 Bson projection) {
-        MongoDatabase connect = connect();
-        MongoCollection<Document> collection = connect.getCollection(collectionName);
+        MongoCollection<Document> collection = toMongoCollection(collectionName);
         return collection.find(filter).projection(projection);
     }
+
+    public AggregateIterable<Document> aggregateDocuments(String collectionName,
+                                                          List<Bson> pipeline) {
+        MongoCollection<Document> collection = toMongoCollection(collectionName);
+        return collection.aggregate(pipeline);
+    }
+
+    private MongoCollection<Document> toMongoCollection(String collectionName) {
+        MongoDatabase connect = connect();
+        return connect.getCollection(collectionName);
+    }
+
+
 //
 //
 //    public static void main(String[] args) throws IOException {
